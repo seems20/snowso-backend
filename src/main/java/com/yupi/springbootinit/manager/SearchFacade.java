@@ -1,12 +1,10 @@
-package com.yupi.springbootinit.controller;
+package com.yupi.springbootinit.manager;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yupi.springbootinit.common.BaseResponse;
 import com.yupi.springbootinit.common.ErrorCode;
-import com.yupi.springbootinit.common.ResultUtils;
+import com.yupi.springbootinit.datasource.*;
 import com.yupi.springbootinit.exception.BusinessException;
 import com.yupi.springbootinit.exception.ThrowUtils;
-import com.yupi.springbootinit.manager.SearchFacade;
 import com.yupi.springbootinit.model.dto.post.PostQueryRequest;
 import com.yupi.springbootinit.model.dto.search.SearchRequest;
 import com.yupi.springbootinit.model.dto.user.UserQueryRequest;
@@ -19,103 +17,75 @@ import com.yupi.springbootinit.service.PictureService;
 import com.yupi.springbootinit.service.PostService;
 import com.yupi.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * 帖子接口
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
- */
-@RestController
-@RequestMapping("/search")
+@Component
 @Slf4j
-public class SearchController {
+public class SearchFacade {
 
     @Resource
-    private UserService userService;
+    private PostDataSource postDataSource;
 
     @Resource
-    private PostService postService;
+    private UserDataSource userDataSource;
 
     @Resource
-    private PictureService pictureService;
+    private PictureDataSource pictureDataSource;
 
-    @PostMapping("/all")
-    public BaseResponse<SearchVO> searchAll(@RequestBody SearchRequest searchRequest, HttpServletRequest request) {
+    @Resource
+    private DataSourceRegistry dataSourceRegistry;
+
+    public SearchVO searchAll(@RequestBody SearchRequest searchRequest, HttpServletRequest request) {
         String type = searchRequest.getType();
         SearchTypeEnum searchTypeEnum = SearchTypeEnum.getEnumByValue(type);
         ThrowUtils.throwIf(StringUtils.isBlank(type), ErrorCode.PARAMS_ERROR);
         String searchText = searchRequest.getSearchText();
-
+        long current = searchRequest.getCurrent();
+        long pageSize = searchRequest.getPageSize();
         // 搜索出所有数据
         if (searchTypeEnum == null) {
             CompletableFuture<Page<UserVO>> userTask = CompletableFuture.supplyAsync(() -> {
-                UserQueryRequest userQueryRequest = new UserQueryRequest();
-                userQueryRequest.setUserName(searchText);
-                Page<UserVO> userVOPage = userService.listUserVOByPage(userQueryRequest);
+                Page<UserVO> userVOPage = userDataSource.doSearch(searchText, current, pageSize);
                 return userVOPage;
             });
-
             CompletableFuture<Page<PostVO>> postTask = CompletableFuture.supplyAsync(() -> {
-                PostQueryRequest postQueryRequest = new PostQueryRequest();
-                postQueryRequest.setSearchText(searchText);
-                Page<PostVO> postVOPage = postService.listPostVOByPage(postQueryRequest, request);
+                Page<PostVO> postVOPage = postDataSource.doSearch(searchText, current, pageSize);
                 return postVOPage;
             });
-
             CompletableFuture<Page<Picture>> pictureTask = CompletableFuture.supplyAsync(() -> {
-                Page<Picture> picturePage = pictureService.searchPicture(searchText, 1, 10);
+                Page<Picture> picturePage = pictureDataSource.doSearch(searchText, 1, 10);
                 return picturePage;
             });
-
             CompletableFuture.allOf(userTask, postTask, pictureTask).join();
             try {
                 Page<UserVO> userVOPage = userTask.get();
                 Page<PostVO> postVOPage = postTask.get();
                 Page<Picture> picturePage = pictureTask.get();
-
                 SearchVO searchVO = new SearchVO();
                 searchVO.setUserList(userVOPage.getRecords());
                 searchVO.setPostList(postVOPage.getRecords());
                 searchVO.setPictureList(picturePage.getRecords());
-                return ResultUtils.success(searchVO);
+                return searchVO;
             } catch (Exception e) {
                 log.error("查询异常", e);
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "查询异常");
             }
         } else {
             SearchVO searchVO = new SearchVO();
-            switch (searchTypeEnum) {
-                case POST:
-                    PostQueryRequest postQueryRequest = new PostQueryRequest();
-                    postQueryRequest.setSearchText(searchText);
-                    Page<PostVO> postVOPage = postService.listPostVOByPage(postQueryRequest, request);
-                    searchVO.setPostList(postVOPage.getRecords());
-                    break;
-                case USER:
-                    UserQueryRequest userQueryRequest = new UserQueryRequest();
-                    userQueryRequest.setUserName(searchText);
-                    Page<UserVO> userVOPage = userService.listUserVOByPage(userQueryRequest);
-                    searchVO.setUserList(userVOPage.getRecords());
-                    break;
-                case PICTURE:
-                    Page<Picture> picturePage = pictureService.searchPicture(searchText, 1, 10);
-                    searchVO.setPictureList(picturePage.getRecords());
-                    break;
-                default:
-            }
-            return ResultUtils.success(searchVO);
+            DataSource<?> dataSource = dataSourceRegistry.getDataSourceByType(type);
+            Page<?> page = dataSource.doSearch(searchText, current, pageSize);
+            searchVO.setDataList(page.getRecords());
+            return searchVO;
         }
     }
+
 }
