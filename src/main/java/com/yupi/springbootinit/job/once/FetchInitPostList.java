@@ -18,8 +18,8 @@ import java.util.Map;
 /**
  * 获取初始帖子列表
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ * @author <a href="https://github.com/20">忽逢雪</a>
+ *  
  */
 // 取消 @Component 注释后, 每次启动 SpringBoot 项目会执行一次 run 方法
 //@Component
