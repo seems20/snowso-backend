@@ -7,3 +7,15 @@
 ![image](https://github.com/seems20/snowso-backend/assets/76840587/cfa30b5c-8009-43c6-a78c-7a202ea1c8f6)
 ![image](https://github.com/seems20/snowso-backend/assets/76840587/a75d736b-5bf9-4182-a9f4-e4e5d8c704c1)
 ![image](https://github.com/seems20/snowso-backend/assets/76840587/2c8a31e3-2d2a-4647-b3b4-f1fbf32e3244)
+## 项目架构
+![image](https://github.com/seems20/snowso-backend/assets/76840587/7643d35f-2b07-4646-9b99-88853344fe3d)
+## 技术选型
+### 前端
+Vue  
+Ant Design  
+## 后端
+Spring Boot2.7  
+MySQL
+Elastic Stack  
+数据抓取（Httpclient、jsoup）  
+设计模式  
