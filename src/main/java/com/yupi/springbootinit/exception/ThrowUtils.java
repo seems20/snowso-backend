@@ -5,7 +5,7 @@ import com.yupi.springbootinit.common.ErrorCode;
 /**
  * 抛异常工具类
  *
- * @author <a href="https://github.com/20">忽逢雪</a>
+ * @author <a href=" https://github.com/seems20">忽逢雪</a>
  *  
  */
 public class ThrowUtils {

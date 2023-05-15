@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 /**
  * 帖子点赞数据库操作
  *
- * @author <a href="https://github.com/20">忽逢雪</a>
+ * @author <a href=" https://github.com/seems20">忽逢雪</a>
  *  
  */
 public interface PostThumbMapper extends BaseMapper<PostThumb> {

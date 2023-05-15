@@ -11,7 +11,7 @@ import lombok.Data;
 /**
  * 帖子收藏
  *
- * @author <a href="https://github.com/20">忽逢雪</a>
+ * @author <a href=" https://github.com/seems20">忽逢雪</a>
  *  
  **/
 @TableName(value = "post_favour")

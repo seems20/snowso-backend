@@ -3,7 +3,7 @@ package com.yupi.springbootinit.constant;
 /**
  * 用户常量
  *
- * @author <a href="https://github.com/20">忽逢雪</a>
+ * @author <a href=" https://github.com/seems20">忽逢雪</a>
  *  
  */
 public interface UserConstant {

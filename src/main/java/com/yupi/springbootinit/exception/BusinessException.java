@@ -5,7 +5,7 @@ import com.yupi.springbootinit.common.ErrorCode;
 /**
  * 自定义异常类
  *
- * @author <a href="https://github.com/20">忽逢雪</a>
+ * @author <a href=" https://github.com/seems20">忽逢雪</a>
  *  
  */
 public class BusinessException extends RuntimeException {
